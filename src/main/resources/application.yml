@@ -1,3 +1,10 @@
 spring:
   profiles:
     active: dev
+
+# minio 配置
+minio:
+  url: http://localhost:9001 # 对象存储服务的URL
+  accessKey: admin # Access key 账户
+  secretKey: test_123  # Secret key 密码
+  bucketName: test

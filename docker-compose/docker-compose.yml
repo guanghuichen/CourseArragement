@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  course-api-db-flyway:
+    image: flyway/flyway:6.3.1
+    container_name: course-api-db-flyway
+    command: -configFiles=/flyway/conf/flyway.config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    volumes:
+      - ./sql:/flyway/sql
+      - ./flyway/course-docker-flyway.config:/flyway/conf/flyway.config
+    depends_on:
+      - course-api-db
+
+  course-api-db:
+    image: mysql:latest
+    container_name: course-api-db
+    volumes:
+      - ./mysql-data/course :/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DATABASE=db_course_arrangement
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+
+  minio-check:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    volumes:
+      - ./minio-data/data:/data # 持久化地址
+    ports:
+      - "9000:9000" # 绑定端口
+      - "9001:9001"
+    container_name: minio-check
+    restart: always
+    environment:
+      MINIO_ROOT_USER: admin # 账号
+      MINIO_ROOT_PASSWORD: test_123 #密码
+
+  create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio-check
+    container_name: create-bucket
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add courseMinio http://minio-check:9000 admin test_123;
+      /usr/bin/mc mb courseMinio/test;
+      exit 0;
+      "
