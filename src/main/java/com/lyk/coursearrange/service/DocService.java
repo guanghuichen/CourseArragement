@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.lyk.coursearrange.entity.request.DocsVO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 /**
  * @author lequal
  * @since 2020-05-27
@@ -13,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface DocService extends IService<Doc> {
 
     // 上传文档
-    ServerResponse uploadDocs(MultipartFile file);
+    ServerResponse uploadDocs(MultipartFile file) throws Exception;
 
     // 根据id下载文档
     ServerResponse downloadDocs(Integer id);

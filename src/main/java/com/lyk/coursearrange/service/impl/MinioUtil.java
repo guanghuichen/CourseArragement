@@ -1,19 +1,29 @@
 package com.lyk.coursearrange.service.impl;
 
+import com.lyk.coursearrange.common.FileInfo;
 import io.minio.*;
 import io.minio.messages.Bucket;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class MinioUtil {
 
   @Autowired
   private MinioClient minioClient;
+
+  @Value("${minio.url}")
+  private String url;
+
+  @Value("${minio.bucketName}")
+  private String bucketName;
 
   /**
    * 创建一个桶
@@ -28,9 +38,10 @@ public class MinioUtil {
   /**
    * 上传一个文件
    */
-  public void uploadFile(InputStream stream, String bucket, String objectName) throws Exception {
+  public FileInfo uploadFile(InputStream stream, String bucket, String objectName) throws Exception {
     minioClient.putObject(PutObjectArgs.builder().bucket(bucket).object(objectName)
         .stream(stream, -1, 10485760).build());
+    return composeUrl(objectName);
   }
 
   /**
@@ -66,5 +77,9 @@ public class MinioUtil {
    */
   public void deleteObject(String bucket, String objectName) throws Exception {
     minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(objectName).build());
+  }
+
+  private FileInfo composeUrl(String fileName) {
+    return FileInfo.builder().url(url + "/" + bucketName + "/" + fileName).name(fileName).build();
   }
 }

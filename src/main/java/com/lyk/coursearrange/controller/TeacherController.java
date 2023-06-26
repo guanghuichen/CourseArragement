@@ -4,19 +4,22 @@ package com.lyk.coursearrange.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lyk.coursearrange.common.FileInfo;
 import com.lyk.coursearrange.common.ServerResponse;
 import com.lyk.coursearrange.entity.Teacher;
 import com.lyk.coursearrange.entity.request.PasswordVO;
 import com.lyk.coursearrange.entity.request.TeacherAddRequest;
 import com.lyk.coursearrange.entity.request.UserLoginRequest;
 import com.lyk.coursearrange.service.TeacherService;
+import com.lyk.coursearrange.service.impl.MinioUtil;
 import com.lyk.coursearrange.service.impl.TokenService;
-import com.lyk.coursearrange.util.AliyunUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +36,11 @@ public class TeacherController {
     private TeacherService teacherService;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private MinioUtil minioUtil;
 
+    @Value("${minio.bucketName}")
+    private String bucketName;
 
     /**
      * 上传讲师证件
@@ -42,9 +49,9 @@ public class TeacherController {
      * @return
      */
     @PostMapping("/upload/{id}")
-    public ServerResponse uploadLicense(@PathVariable("id") Integer id, MultipartFile file) {
-        Map<String, Object> map = AliyunUtil.upload(file, "license");
-        String license = (String) map.get("url");
+    public ServerResponse uploadLicense(@PathVariable("id") Integer id, MultipartFile file) throws Exception {
+        FileInfo fileInfo = minioUtil.uploadFile(file.getInputStream(), bucketName, file.getOriginalFilename());
+        String license = fileInfo.getUrl();
         Teacher t = teacherService.getById(id);
         t.setLicense(license);
         boolean b = teacherService.updateById(t);

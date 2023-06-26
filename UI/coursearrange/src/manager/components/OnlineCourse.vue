@@ -47,7 +47,9 @@
         <el-table-column prop="videoName" label="视频名称"></el-table-column>
         <el-table-column prop="cover" label="封面" width="80">
           <template slot-scope="scope">
-            <el-image fit="contain" style="width: 24px; height: 30px" :src="scope.row.cover"></el-image>
+<!--            <el-image fit="contain" style="width: 24px; height: 30px" :src="scope.row.cover"></el-image>-->
+            <el-image fit="contain" style="width: 24px; height: 30px" :src="getCoverUrl(scope.row.imageByte)"></el-image>
+
           </template>
         </el-table-column>
         <el-table-column prop="videoUrl" label="视频地址">
@@ -207,6 +209,12 @@ export default {
             });
         });
       });
+    },
+    getCoverUrl(cover) {
+      const blob = new Blob([cover], { type: 'image/jpeg' });
+      // 创建 Blob URL
+      const imageUrl = URL.createObjectURL(blob);
+      return imageUrl;
     },
     handleChange() {
       if (this.cascader.length <= 1) {

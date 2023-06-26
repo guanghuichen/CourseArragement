@@ -72,6 +72,8 @@ public class OnlineVideo extends Model<OnlineVideo> {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
+    @TableField(exist = false)
+    private byte[] imageByte;
 
     @Override
     protected Serializable pkVal() {

@@ -23,7 +23,7 @@ GitHub地址: https://github.com/lyk1576070851/CourseArragement
     Vue2.x + Element UI，使用npm包管理工具
 
 后端技术栈：
-    JDK1.8 + Spring Boot + MySQL8.0 + Mybatis-Plus，使用maven实现包管理，开发工具：IDEA
+    JDK11 + Spring Boot + MySQL8.0 + Mybatis-Plus，使用maven实现包管理，开发工具：IDEA
 
 
 

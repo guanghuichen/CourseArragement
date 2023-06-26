@@ -29,7 +29,7 @@ public class DocController {
      * @return
      */
     @PostMapping("/uploaddocs")
-    public ServerResponse uploadDocs(MultipartFile file) {
+    public ServerResponse uploadDocs(MultipartFile file) throws Exception {
         return docService.uploadDocs(file);
     }
 
