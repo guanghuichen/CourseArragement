@@ -54,9 +54,13 @@
         <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
-            <version>8.4.2</version>
+            <version>8.5.4</version>
         </dependency>
-
+<!--        <dependency>-->
+<!--            <groupId>com.squareup.okhttp3</groupId>-->
+<!--            <artifactId>okhttp</artifactId>-->
+<!--            <version>4.10.0</version> &lt;!&ndash; 根据需要更改版本号 &ndash;&gt;-->
+<!--        </dependency>-->
         <!-- commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
