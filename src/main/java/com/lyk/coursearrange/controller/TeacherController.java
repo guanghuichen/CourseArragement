@@ -51,7 +51,7 @@ public class TeacherController {
     @PostMapping("/upload/{id}")
     public ServerResponse uploadLicense(@PathVariable("id") Integer id, MultipartFile file) throws Exception {
         FileInfo fileInfo = minioUtil.uploadFile(file.getInputStream(), bucketName, file.getOriginalFilename());
-        String license = fileInfo.getUrl();
+        String license = fileInfo.getName();
         Teacher t = teacherService.getById(id);
         t.setLicense(license);
         boolean b = teacherService.updateById(t);
@@ -133,6 +133,9 @@ public class TeacherController {
         Page<Teacher> pages = new Page<>(page, limit);
         QueryWrapper<Teacher> wrapper = new QueryWrapper<Teacher>().orderByDesc("teacher_no");
         IPage<Teacher> iPage = teacherService.page(pages, wrapper);
+        if(pages!=null){
+            handlerLicenseUrl(iPage.getRecords());
+        }
         return ServerResponse.ofSuccess(iPage);
     }
 
@@ -149,6 +152,7 @@ public class TeacherController {
         Page<Teacher> pages = new Page<>(page, limit);
         IPage<Teacher> iPage = teacherService.page(pages, wrapper);
         if (page != null) {
+            handlerLicenseUrl(iPage.getRecords());
             return ServerResponse.ofSuccess(iPage);
         }
         return ServerResponse.ofError("查询失败!");
@@ -260,5 +264,17 @@ public class TeacherController {
         return ServerResponse.ofSuccess(teacherService.list());
     }
 
+    private void handlerLicenseUrl(List<Teacher> teachers) {
+        teachers.forEach(record->{
+            try {
+                if (StringUtils.isNotBlank( record.getLicense())){
+                    String  license = minioUtil.preSignedGetObject(bucketName, record.getLicense(), null);
+                    record.setLicense(license);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 }
 

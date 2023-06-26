@@ -2,16 +2,20 @@ package com.lyk.coursearrange.service.impl;
 
 import com.lyk.coursearrange.common.FileInfo;
 import io.minio.*;
+import io.minio.errors.*;
+import io.minio.http.Method;
 import io.minio.messages.Bucket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+
+import static io.minio.GetPresignedObjectUrlArgs.DEFAULT_EXPIRY_TIME;
 
 @Component
 public class MinioUtil {
@@ -77,6 +81,17 @@ public class MinioUtil {
    */
   public void deleteObject(String bucket, String objectName) throws Exception {
     minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(objectName).build());
+  }
+
+  public String preSignedGetObject(String bucketName, String objectName, Integer expires) throws Exception {
+    String fileUrl = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+        .method(Method.GET)
+        .bucket(bucketName)
+        .object(objectName)
+        .expiry(Objects.isNull(expires) ? DEFAULT_EXPIRY_TIME : expires)
+        .build()
+    );
+    return fileUrl;
   }
 
   private FileInfo composeUrl(String fileName) {

@@ -8,8 +8,10 @@ import com.lyk.coursearrange.common.ServerResponse;
 import com.lyk.coursearrange.entity.OnlineCourse;
 import com.lyk.coursearrange.entity.request.OnlineCourseAddVO;
 import com.lyk.coursearrange.service.OnlineCourseService;
+import com.lyk.coursearrange.service.impl.MinioUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +27,12 @@ public class OnlineCourseController {
 
     @Autowired
     private OnlineCourseService ocs;
+
+    @Autowired
+    private MinioUtil minioUtil;
+
+    @Value("${minio.bucketName}")
+    private String bucketName;
 
     /**
      * 首页展示的热门课程
@@ -54,6 +62,14 @@ public class OnlineCourseController {
         Page<OnlineCourse> pages = new Page<>(page, limit);
         IPage<OnlineCourse> iPage = ocs.page(pages, wrapper);
         if (page != null) {
+            iPage.getRecords().forEach(onlineCourse -> {
+                try {
+                    String coverUrl = minioUtil.preSignedGetObject(bucketName, onlineCourse.getCover(), null);
+                    onlineCourse.setCover(coverUrl);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
             return ServerResponse.ofSuccess(iPage);
         }
         return ServerResponse.ofError("查询不到数据");

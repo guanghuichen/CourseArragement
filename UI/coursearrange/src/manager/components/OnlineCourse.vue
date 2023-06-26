@@ -47,14 +47,13 @@
         <el-table-column prop="videoName" label="视频名称"></el-table-column>
         <el-table-column prop="cover" label="封面" width="80">
           <template slot-scope="scope">
-<!--            <el-image fit="contain" style="width: 24px; height: 30px" :src="scope.row.cover"></el-image>-->
-            <el-image fit="contain" style="width: 24px; height: 30px" :src="getCoverUrl(scope.row.imageByte)"></el-image>
-
+            <el-image fit="contain" style="width: 24px; height: 30px" :src="scope.row.cover"></el-image>
           </template>
         </el-table-column>
         <el-table-column prop="videoUrl" label="视频地址">
           <template slot-scope="scope">
-              <el-link :href="scope.row.videoUrl" target="_blank">视频链接</el-link>
+            <el-link @click="openVideoDialog(scope.row.videoUrl)">视频链接</el-link>
+<!--              <el-link :href="scope.row.videoUrl" target="_blank">视频链接</el-link>-->
           </template>
         </el-table-column>
         <el-table-column prop="fromUserName" label="发布者"></el-table-column>
@@ -71,7 +70,9 @@
         </el-table-column>
       </el-table>
     </el-dialog>
-
+    <el-dialog :visible.sync="videoDialogVisible" title="视频播放" width="800px" @close="closeVideoDialog">
+      <video ref="videoPlayer" controls :src="videoUrl"></video>
+    </el-dialog>
     <el-dialog
       title="上传课程"
       :visible.sync="uploadCourseVisibleForm"
@@ -183,7 +184,9 @@ export default {
       detailRowId: {},
       courseOptions: [],
       loading: true,
-      uu: {}
+      uu: {},
+      videoDialogVisible: false,
+      videoUrl: ''
     };
   },
   mounted() {
@@ -210,11 +213,16 @@ export default {
         });
       });
     },
-    getCoverUrl(cover) {
-      const blob = new Blob([cover], { type: 'image/jpeg' });
-      // 创建 Blob URL
-      const imageUrl = URL.createObjectURL(blob);
-      return imageUrl;
+    openVideoDialog(url) {
+      this.videoUrl = url;
+      this.videoDialogVisible = true;
+      this.$nextTick(() => {
+        this.$refs.videoPlayer.play();
+      });
+    },
+    closeVideoDialog() {
+      this.videoDialogVisible = false;
+      this.$refs.videoPlayer.pause();
     },
     handleChange() {
       if (this.cascader.length <= 1) {
@@ -305,10 +313,10 @@ export default {
       this.uploadVideoVisibleForm = false;
     },
     handleCourseCoverSuccess(res, file) {
-      this.uploadCourseForm.cover = res.data.url;
+      this.uploadCourseForm.cover = res.data.name;
     },
     handleVideoCoverSuccess(res, file) {
-      this.uploadVideoForm.cover = res.data.url;
+      this.uploadVideoForm.cover = res.data.name;
     },
     handleVideoUploadSuccess(res, file) {
       this.uploadVideoForm.videoUrl = res.data.url;

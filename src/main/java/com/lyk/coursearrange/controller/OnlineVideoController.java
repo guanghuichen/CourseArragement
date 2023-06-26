@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * @author lequal
  * @since 2020-06-04
@@ -38,7 +40,18 @@ public class OnlineVideoController {
    */
   @GetMapping("/get/{id}")
   public ServerResponse getAllVideo(@PathVariable("id") Integer id) throws Exception {
-    return ServerResponse.ofSuccess(ovs.list(new QueryWrapper<OnlineVideo>().eq("online_course_id", id)));
+    List<OnlineVideo> onlineVideoList = ovs.list(new QueryWrapper<OnlineVideo>().eq("online_course_id", id));
+    onlineVideoList.forEach(onlineVideo -> {
+      try {
+        String coverUrl = minioUtil.preSignedGetObject(bucketName, onlineVideo.getCover(), null);
+        String videoUrl = minioUtil.preSignedGetObject(bucketName, onlineVideo.getVideoName(), null);
+        onlineVideo.setCover(coverUrl);
+        onlineVideo.setVideoUrl(videoUrl);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    });
+    return ServerResponse.ofSuccess(onlineVideoList);
   }
 
   /**
