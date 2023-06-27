@@ -36,13 +36,3 @@ mybatis-plus:
 
 server:
   port: 8080
-
-
-# 阿里云OSS
-aliyun:
-  oss:
-    file:
-      endpoint: oss-cn-shenzhen.aliyuncs.com
-      accessKeyId: 你们自己的key
-      accessKeySecret: 你们自己的密钥
-      bucketName: arrange
